@@ -1,70 +1,61 @@
-import threading
-import time
-
 def rotate_matrix(matrix):
+    """Поворачивает матрицу на 90 градусов по часовой стрелке."""
     return [list(reversed(col)) for col in zip(*matrix)]
 
-def create_input_function():
-    # Создаем замыкание для ввода массива
-    def input_array():
-        return list(map(int, input("Введите элементы массива через пробел: ").split()))
-    return input_array
+def input_array(prompt="Введите элементы массива через пробел: "):
+    """Функция для ввода массива от пользователя."""
+    return list(map(int, input(prompt).strip().split()))
 
 def main_menu():
+    """Отображает главное меню."""
     print("\nГлавное меню:")
     print("1. Задача 1")
     print("2. Задача 2")
-    print("3. Выход")
+    print("3. Повернуть матрицу")
+    print("4. Выход")
 
-def rotation_task(global_matrix, matrix_changed):
-    # Функция для поворота матрицы в отдельном потоке
-    while True:
-        if matrix_changed[0]:
-            with matrix_lock:
-                if matrix_changed[0]:
-                    global_matrix[0] = rotate_matrix(global_matrix[0])
-                    print("Матрица повернута:")
-                    for row in global_matrix[0]:
-                        print(row)
-                    matrix_changed[0] = False
-        time.sleep(0.1)
+def task_1(array1, array2):
+    """Пример задачи 1 (сумма двух массивов)."""
+    return list(map(lambda x, y: x + y, array1, array2))
+
+def task_2(array1, array2, array3):
+    """Пример задачи 2 (сумма трех массивов)."""
+    return list(map(lambda x, y, z: x + y + z, array1, array2, array3))
+
+def get_matrix_input(rows_count):
+    """Функция для ввода матрицы заданного количества рядов."""
+    return [input_array(f"Введите ряд {i + 1} матрицы через пробел: ") for i in range(rows_count)]
 
 def main():
-    # Используем списки для хранения глобальных переменных
-    global_matrix = [None]
-    matrix_changed = [False]
-
-    # Запуск потока для поворота матрицы
-    rotation_thread = threading.Thread(target=rotation_task, args=(global_matrix, matrix_changed), daemon=True)
-    rotation_thread.start()
-
-    input_array = create_input_function()  # Получаем функцию ввода
-
     while True:
         main_menu()
-        choice = int(input("Выберите пункт меню: "))
-
-        if choice == 1:
+        choice = input("Выберите пункт меню: ")
+        
+        if choice == '1':
             array1 = input_array()
             array2 = input_array()
-            with matrix_lock:
-                global_matrix[0] = [array1, array2]
-                matrix_changed[0] = True
-            print(f"Результат задачи 1: {global_matrix[0]}")
-        elif choice == 2:
+            result = task_1(array1, array2)
+            print("Результат задачи 1:", result)
+        elif choice == '2':
             array1 = input_array()
             array2 = input_array()
             array3 = input_array()
-            with matrix_lock:
-                global_matrix[0] = [array1, array2, array3]
-                matrix_changed[0] = True
-            print(f"Результат задачи 2: {global_matrix[0]}")
-        elif choice == 3:
+            result = task_2(array1, array2, array3)
+            print("Результат задачи 2:", result)
+        elif choice == '3':
+            try:
+                rows_count = int(input("Введите количество рядов матрицы: "))
+                matrix = get_matrix_input(rows_count)
+                rotated_matrix = rotate_matrix(matrix)
+                print("Исходная матрица:", matrix)
+                print("Повернутая матрица:", rotated_matrix)
+            except ValueError:
+                print("Пожалуйста, введите целое число.")
+        elif choice == '4':
             print("Завершение работы программы.")
             break
         else:
             print("Неверный выбор. Попробуйте снова.")
 
 if __name__ == "__main__":
-    matrix_lock = threading.Lock()  # Инициализация блокировки
     main()
